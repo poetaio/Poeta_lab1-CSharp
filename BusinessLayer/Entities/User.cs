@@ -4,13 +4,13 @@ using System.Text;
 
 namespace BusinessLayer.Entities
 {
-    class User : EntityBase
+    public class User : EntityBase
     {
         private string _name;
         private string _surname;
         private string _email;
-        private List<Category> _categories;
-        private List<Wallet> _wallets;
+        private Dictionary<string, Category> _categories;
+        private Dictionary<string, Wallet> _wallets;
         
         public string Name 
         {
@@ -24,8 +24,11 @@ namespace BusinessLayer.Entities
         }
         public string FullName 
         { 
-            get { return $"{Name} {Surname}"; }
-            private set { } 
+            get 
+            { 
+                return $"{Name} {Surname}".Trim(); 
+            }
+            private set { }
         }
         public string Email 
         {
@@ -33,9 +36,34 @@ namespace BusinessLayer.Entities
             set { _email = value; }
         }
 
+        public User() 
+        {
+            _categories = new Dictionary<string, Category>();
+            _wallets = new Dictionary<string, Wallet>();
+        }
+
+        public void AddWallet(Wallet newWallet)
+        {
+            _wallets.Add(newWallet.Name, newWallet);
+        }
+
+        public bool RemoveWallet(string name)
+        {
+            return _wallets.Remove(name);
+        }
+
+        public Wallet GetWallet(string name)
+        {
+            Wallet resWallet;
+            _wallets.TryGetValue(name, out resWallet);
+            return resWallet;
+        }
+
         public override bool Validate()
         {
-            return true;
+            return !String.IsNullOrEmpty(Name) && !String.IsNullOrEmpty(Surname);
         }
+
+
     }
 }

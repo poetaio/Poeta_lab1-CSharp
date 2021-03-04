@@ -8,5 +8,10 @@ namespace BusinessLayerTests
     public class CategoryTests
     {
 
+        [Fact]
+        public void ValidationTest()
+        {
+
+        }
     }
 }

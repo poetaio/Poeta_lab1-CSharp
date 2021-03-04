@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 
 namespace BusinessLayer.Entities
@@ -37,6 +35,12 @@ namespace BusinessLayer.Entities
         {
             return !String.IsNullOrWhiteSpace(Name) && 
                 !String.IsNullOrWhiteSpace(Description);
+        }
+
+        public override string ToString()
+        {
+            return $"Category \"{Name}\"\nDescription: {Description}\n" +
+                $"Color: {Color}\nIcon: {Icon}";
         }
     }
 }
