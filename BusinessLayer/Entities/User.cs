@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace BusinessLayer.Entities
 {
@@ -9,61 +8,35 @@ namespace BusinessLayer.Entities
         private string _name;
         private string _surname;
         private string _email;
-        private Dictionary<string, Category> _categories;
-        private Dictionary<string, Wallet> _wallets;
+
+        private List<Category> _categories;
+        private List<Wallet> _wallets;
         
-        public string Name 
+       
+        public string Name { get => _name; set => _name = value; }
+        public string Surname { get => _surname; set => _surname = value; }
+        public string FullName
         {
-            get { return _name; }
-            set { _name = value; }
-        }
-        public string Surname 
-        {
-            get { return _surname; }
-            set { _surname = value; } 
-        }
-        public string FullName 
-        { 
-            get 
-            { 
-                return $"{Name} {Surname}".Trim(); 
-            }
+            get
+            { return $"{Name} {Surname}".Trim(); }
             private set { }
         }
-        public string Email 
-        {
-            get { return _email; } 
-            set { _email = value; }
-        }
+        public string Email { get => _email; set => _email = value; }
+        public List<Category> Categories { get => _categories; set => _categories = value; }
+        public List<Wallet> Wallets { get => _wallets; set => _wallets = value; }
 
-        public User() 
+        public User(string name, string surname, string email)
         {
-            _categories = new Dictionary<string, Category>();
-            _wallets = new Dictionary<string, Wallet>();
-        }
-
-        public void AddWallet(Wallet newWallet)
-        {
-            _wallets.Add(newWallet.Name, newWallet);
-        }
-
-        public bool RemoveWallet(string name)
-        {
-            return _wallets.Remove(name);
-        }
-
-        public Wallet GetWallet(string name)
-        {
-            Wallet resWallet;
-            _wallets.TryGetValue(name, out resWallet);
-            return resWallet;
+            Name = name;
+            Surname = surname;
+            Email = email;
+            Categories = new List<Category>();
+            Wallets = new List<Wallet>();
         }
 
         public override bool Validate()
         {
             return !String.IsNullOrEmpty(Name) && !String.IsNullOrEmpty(Surname);
         }
-
-
     }
 }

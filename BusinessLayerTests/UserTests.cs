@@ -12,9 +12,9 @@ namespace BusinessLayerTests
         public void ValidationTest()
         {
             // Arrange
-            User validUser = new User() { Name = "Ilia", Surname = "Poeta" };
-            User invalidNameUser = new User() { Name = "", Surname = "Poeta" };
-            User invalidSurnameUser = new User() { Name = "Ilia", Surname = "" };
+            User validUser = new User("Ilia", "Poeta", "em@c.com");
+            User invalidNameUser = new User("", "Poeta", "em@c.com");
+            User invalidSurnameUser = new User("Ilia", "", "em@c.com");
 
             // Act
             bool isValidValid = validUser.Validate();
@@ -31,9 +31,9 @@ namespace BusinessLayerTests
         public void FullNameTest()
         {
             // Arrange
-            User validUser = new User() { Name = "Ilia", Surname = "Poeta" };
-            User invalidNameUser = new User() { Name = "", Surname = "Poeta" };
-            User invalidSurnameUser = new User() { Name = "Ilia", Surname = "" };
+            User validUser = new User("Ilia", "Poeta", "em@c.com");
+            User invalidNameUser = new User("", "Poeta", "em@c.com");
+            User invalidSurnameUser = new User("Ilia", "", "em@c.com");
             string expectedValidFullName = "Ilia Poeta";
             string expectedInvalidName = "Poeta";
             string expectedInvalidSurname = "Ilia";
@@ -53,22 +53,27 @@ namespace BusinessLayerTests
         public void SharedWalletTest()
         {
             // Arrange
-            User firstUser = new User();
-            User secondUser = new User();
+            User firstUser = new User("U1", "U1", "em@c.com");
+            User secondUser = new User("U2", "U2", "em@c.com");
 
-            Wallet wallet = new Wallet(50) { Name = "Wallet" };
-            wallet.AddTransaction(new Transaction() { Name = "t0" });
-            firstUser.AddWallet(wallet);
-            secondUser.AddWallet(wallet);
+            Wallet wallet = new Wallet("Wallet", "Descr", "USD", 50);
+            wallet.Categories.Add(null);
 
-            firstUser.GetWallet(wallet.Name).AddTransaction(new Transaction() { Name="t1", Sum=10 });
-            secondUser.GetWallet(wallet.Name).AddTransaction(new Transaction() { Name="t2", Sum=-100 });
+            wallet.AddTransaction(new Transaction(0m, "t0", "Description",
+                "USD", null, DateTime.Now));
+            firstUser.Wallets.Add(wallet);
+            secondUser.Wallets.Add(wallet);
 
-            double expectedBalance = -40;
+            firstUser.Wallets.Find(x => x.Name == wallet.Name).AddTransaction(new Transaction(10m, "t1", "Description",
+                "USD", null, DateTime.Now));
+            secondUser.Wallets.Find(x => x.Name == wallet.Name).AddTransaction(new Transaction(-100m, "t2", "Description",
+                "USD", null, DateTime.Now));
+
+            decimal expectedBalance = -40;
 
             // Act
-            double balanceFirstUser = firstUser.GetWallet(wallet.Name).Balance;
-            double balanceSecondUser = secondUser.GetWallet(wallet.Name).Balance;
+            decimal balanceFirstUser = firstUser.Wallets.Find(x => x.Name == wallet.Name).Balance;
+            decimal balanceSecondUser = secondUser.Wallets.Find(x => x.Name == wallet.Name).Balance;
 
             // Assert
             Assert.Equal(expectedBalance, balanceFirstUser);

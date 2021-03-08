@@ -5,14 +5,14 @@ namespace BusinessLayer.Entities
 {
     public class Transaction : EntityBase, IComparable<Transaction>
     {
-        private double _sum;
+        private decimal _sum;
         private string _name;
         private string _description;
         private string _currency;
         private Category _category;
         private DateTime _date;
 
-        public double Sum
+        public decimal Sum
         {
             get { return _sum; }
             set { _sum = value; }
@@ -41,6 +41,16 @@ namespace BusinessLayer.Entities
         {
             get { return _date; }
             set { _date = value; }
+        }
+
+        public Transaction(decimal sum, string name, string description, string currency, Category category, DateTime date)
+        {
+            Sum = sum;
+            Name = name;
+            Description = description;
+            Currency = currency;
+            Category = category;
+            Date = date;
         }
 
         public int CompareTo(Transaction other)

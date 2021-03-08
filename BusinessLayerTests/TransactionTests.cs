@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 using BusinessLayer.Entities;
 
@@ -13,30 +11,14 @@ namespace BusinessLayerTests
         {
 
             // Arrange
-            Transaction validTransaction = new Transaction()
-            {
-                Name = "valid Transaction",
-                Description = "This is a valid Transaction",
-                Currency = "USD"
-            };
-            Transaction invalidNameTransaction = new Transaction()
-            {
-                Name = "",
-                Description = "This is not a valid Transaction",
-                Currency = "USD"
-            };
-            Transaction invalidDescrTransaction = new Transaction()
-            {
-                Name = "invalid Transaction",
-                Description = "",
-                Currency = "USD"
-            };
-            Transaction invalidCurrencyTransaction = new Transaction()
-            {
-                Name = "invalid transaction",
-                Description = "This is not a valid Transaction",
-                Currency = "UsD"
-            };
+            Transaction validTransaction = new Transaction(0.0m, "valid Transaction", "This is a valid Transaction", "USD",
+                null, DateTime.Now);
+            Transaction invalidNameTransaction = new Transaction(0.0m, "", "This is not a valid Transaction", 
+                "USD", null, DateTime.Now);
+            Transaction invalidDescrTransaction = new Transaction(0.0m, "invalid Transaction", "", 
+                "USD", null, DateTime.Now);
+            Transaction invalidCurrencyTransaction = new Transaction(0.0m, "invalid Transaction", "This is not a valid Transaction", 
+                "UsD", null, DateTime.Now);
 
             // Act
             bool isNameValid = invalidNameTransaction.Validate();
@@ -55,23 +37,14 @@ namespace BusinessLayerTests
         public void CompareToTest()
         {
             // Arrange
-            Transaction transaction1 = new Transaction()
-            {
-                Date = new DateTime(2020, 1, 1),
-                Name = "t"
-            };
+            Transaction transaction1 = new Transaction(0.0m, "Transaction1", "Description",
+                "USD", null, new DateTime(2020, 1, 1));
+            
+            Transaction transaction2 = new Transaction(0.0m, "Transaction1", "Description",
+                "USD", null, new DateTime(2020, 1, 1));
 
-            Transaction transaction2 = new Transaction()
-            {
-                Date = new DateTime(2020, 1, 1),
-                Name = "t"
-            };
-
-            Transaction transaction3 = new Transaction()
-            {
-                Date = new DateTime(2020, 1, 2),
-                Name = "t3"
-            };
+            Transaction transaction3 = new Transaction(0.0m, "Transaction", "Description",
+                "USD", null, new DateTime(2020, 1, 2));
 
             // Act
             bool compare12 = transaction1.CompareTo(transaction2) == 0;

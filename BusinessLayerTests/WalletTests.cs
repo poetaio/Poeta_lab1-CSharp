@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Drawing;
 using Xunit;
 using BusinessLayer.Entities;
 
@@ -13,29 +12,10 @@ namespace BusinessLayerTests
         public void ValidationTest()
         {
             // Arrange
-            Wallet validWallet = new Wallet(0.0) { 
-                Name = "valid Wallet", 
-                Description = "This is a valid wallet", 
-                Currency = "USD"
-            };
-            Wallet invalidNameWallet = new Wallet(0.0)
-            {
-                Name = "",
-                Description = "This is not a valid wallet",
-                Currency = "USD"
-            };
-            Wallet invalidDescrWallet = new Wallet(0.0)
-            {
-                Name = "invalid Wallet",
-                Description = "",
-                Currency = "USD"
-            };
-            Wallet invalidCurrencyWallet = new Wallet(0.0)
-            {
-                Name = "invalid Wallet",
-                Description = "This is not a valid wallet",
-                Currency = "UsD"
-            };
+            Wallet validWallet = new Wallet("valid Wallet", "This is a valid wallet", "USD", 0m);
+            Wallet invalidNameWallet = new Wallet("", "This is a valid wallet", "USD", 0m);
+            Wallet invalidDescrWallet = new Wallet("valid Wallet", "", "USD", 0m);
+            Wallet invalidCurrencyWallet = new Wallet("valid Wallet", "This is a valid wallet", "UsD", 0m);
 
             // Act
             bool isNameValid = invalidNameWallet.Validate();
@@ -54,24 +34,22 @@ namespace BusinessLayerTests
         public void BalanceTest()
         {
             // Arrange
-            Wallet wallet = new Wallet(10000)
-            {
-                Name = "Ilia's Poeta",
-                Description = "This is my wallet",
-                Currency = "UAH"
-            };
-            var transactions = new SortedSet<Transaction>()
-            {
-                new Transaction() {Sum = 14.5, Date = DateTime.Now },
-                new Transaction() {Sum = 150, Date = DateTime.Now.AddDays(-10) },
-                new Transaction() {Sum = 1100, Date = DateTime.Now.AddDays(-50) },
-                new Transaction() {Sum = -1000 }
-            };
-            wallet.Transactions = transactions;
-            double expectedBalance = 10264.5;
+            Wallet wallet = new Wallet("Ilia's Poeta", "This is my wallet", "UAH", 10000);
+            wallet.Categories.Add(null);
+
+            wallet.AddTransaction(new Transaction(14.5m, null, null, null, null, 
+                DateTime.Now));
+            wallet.AddTransaction(new Transaction(150m, null, null, null, null, 
+                DateTime.Now.AddDays(-10)));
+            wallet.AddTransaction(new Transaction(1100m, null, null, null, null, 
+                DateTime.Now.AddDays(-50)));
+            wallet.AddTransaction(new Transaction(-1000m, null, null, null, null, 
+                DateTime.Now));
+
+            decimal expectedBalance = 10264.5m;
 
             // Act
-            double balance = wallet.Balance;
+            decimal balance = wallet.Balance;
 
             // Assert
             Assert.Equal(expectedBalance, balance);
@@ -81,34 +59,90 @@ namespace BusinessLayerTests
         public void LastMonthTransactionsTest()
         {
             // Arrange
-            Wallet wallet = new Wallet()
-            {
-                Name = "Ilia's Poeta",
-                Description = "This is my wallet",
-                Currency = "UAH"
-            };
-            var transactions = new SortedSet<Transaction>()
-            {
-                new Transaction() {Sum = 14.5, Date = DateTime.Now },
-                new Transaction() {Sum = 150, Date = DateTime.Now.AddDays(-10) },
-                new Transaction() {Sum = -15.5, Date = DateTime.Now.AddDays(-2) },
-                new Transaction() {Sum = 30, Date = DateTime.Now.AddDays(-1) },
-                new Transaction() {Sum = -14.5, Date = DateTime.Now.AddDays(-20) },
-                // not included
-                new Transaction() {Sum = -1000, Date = DateTime.Now.AddDays(-50) },
-                new Transaction() {Sum = 1000, Date = DateTime.Now.AddDays(-50) }
-            };
-            wallet.Transactions = transactions;
-            double expectedIncome = 194.5;
-            double expectedExpenses = 30;
+            Wallet wallet = new Wallet("Ilia's Poeta", "This is my wallet", "UAH", 0m);
+            wallet.Categories.Add(null);
+
+            wallet.AddTransaction(new Transaction(14.5m, null, null, null, null, 
+                DateTime.Now));
+            wallet.AddTransaction(new Transaction(150m, null, null, null, null, 
+                DateTime.Now.AddDays(-14)));
+            wallet.AddTransaction(new Transaction(-15.5m, null, null, null, null, 
+                DateTime.Now.AddDays(-1)));
+            wallet.AddTransaction(new Transaction(30m, null, null, null, null, 
+                DateTime.Now.AddDays(-10)));
+            wallet.AddTransaction(new Transaction(-14.5m, null, null, null, null, 
+                DateTime.Now.AddDays(-20)));
+            // not included
+            wallet.AddTransaction(new Transaction(-1000m, null, null, null, null, 
+                DateTime.Now.AddDays(-32)));
+            wallet.AddTransaction(new Transaction(5000m, null, null, null, null, 
+                DateTime.Now.AddDays(-50)));
+
+            decimal expectedIncome = 194.5m;
+            decimal expectedExpenses = 30m;
 
             // Act
-            double income = wallet.GetLastMonthIncome();
-            double expenses = wallet.GetLastMonthExpenses();
+            decimal income = wallet.GetLastMonthIncome();
+            decimal expenses = wallet.GetLastMonthExpenses();
 
             // Assert
             Assert.Equal(expectedIncome, income);
             Assert.Equal(expectedExpenses, expenses);
         }
+
+        [Fact]
+        public void ChangeTransactionTest()
+        {
+            // Arrange
+            Wallet wallet = new Wallet("Ilia's Poeta", "This is my wallet", "UAH", 0m);
+
+            wallet.Categories.Add(new Category("Old", "OLD", Color.White, null));
+            wallet.Categories.Add(new Category("New", "New", Color.White, null));
+
+            wallet.AddTransaction(new Transaction(14.5m, "old name", "old description",
+                "OLD", new Category("Old", "OLD", Color.White, null), DateTime.Now));
+            decimal expectedSum = 0;
+            string expectedName = "new name";
+            string expectedDescription = "new description";
+            string expectedCurrency = "NEW";
+            Category expectedCategory = new Category("New", "New", Color.White, null);
+            DateTime expectedDate = DateTime.Now.AddDays(10);
+
+            // Act
+            wallet.setTransactionSum(0, expectedSum);
+            wallet.setTransactionName(0, expectedName);
+            wallet.setTransactionDescription(0, expectedDescription);
+            wallet.setTransactionCurrency(0, expectedCurrency);
+            wallet.setTransactionCategory(0, expectedCategory);
+            wallet.setTransactionDate(0, expectedDate);
+
+            // Assert
+            Assert.Equal(expectedSum, wallet.getTransactionSum(0));
+            Assert.Equal(expectedName, wallet.getTransactionName(0));
+            Assert.Equal(expectedDescription, wallet.getTransactionDescription(0));
+            Assert.Equal(expectedCurrency, wallet.getTransactionCurrency(0));
+            Assert.Equal(expectedCategory, wallet.getTransactionCategory(0));
+            Assert.Equal(expectedDate, wallet.getTransactionDate(0));
+
+        }
+
+        [Fact]
+        public void RemoveTransactionTest()
+        {
+            // Arrange
+            Wallet wallet = new Wallet("Ilia's Poeta", "This is my wallet", "UAH", 0m);
+            wallet.Categories.Add(new Category("Old", "OLD", Color.White, null));
+
+            wallet.AddTransaction(new Transaction(14.5m, "old name", "old description",
+                "OLD", new Category("Old", "OLD", Color.White, null), DateTime.Now));
+
+            // Act
+            wallet.RemoveTransaction("old name");
+
+            // Assert
+            Assert.Throws<ArgumentOutOfRangeException>(() => wallet.setTransactionName(0,
+                "New name"));
+        }
     }
+
 }
